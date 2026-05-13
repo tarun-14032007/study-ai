@@ -1,16 +1,26 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { Routes, Route } from 'react-router-dom'
 
+import Home from './pages/Home'
+import Dashboard from './pages/Dashboard'
+import Chat from './pages/Chat'
+import Notes from './pages/Notes'
+import Planner from './pages/Planner'
+
+import DashboardLayout from './layouts/DashboardLayout'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div>
-      
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+
+      {/* Dashboard routes wrapped in layout */}
+      <Route element={<DashboardLayout />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/notes" element={<Notes />} />
+        <Route path="/planner" element={<Planner />} />
+      </Route>
+    </Routes>
   )
 }
 
