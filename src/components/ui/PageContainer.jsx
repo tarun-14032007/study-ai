@@ -1,16 +1,21 @@
-function PageContainer({ title, children }) {
+function PageContainer({
+  title,
+  children,
+}) {
   return (
-    <div className="w-full">
+    <section className="w-full">
 
-      <h1 className="text-3xl font-bold mb-6">
-        {title}
-      </h1>
+      <div className="mb-8">
 
-      <div>
-        {children}
+        <h1 className="text-4xl font-bold">
+          {title}
+        </h1>
+
       </div>
 
-    </div>
+      {children}
+
+    </section>
   )
 }
 
