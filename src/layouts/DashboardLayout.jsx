@@ -1,41 +1,58 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
-import Navbar from '../components/layout/Navbar.jsx'
 import Sidebar from '../components/layout/Sidebar.jsx'
+import Navbar  from '../components/layout/Navbar.jsx'
 
 export default function DashboardLayout({ user, onLogout }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  useEffect(() => {
+    const handler = () => {
+      const mobile = window.innerWidth < 768
+      setIsMobile(mobile)
+      if (!mobile) setSidebarOpen(false)
+    }
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+
+  // Close sidebar when clicking a link on mobile
+  function closeSidebar() {
+    if (isMobile) setSidebarOpen(false)
+  }
 
   return (
-    <div className="flex h-screen bg-zinc-950 overflow-hidden">
-      {/* Sidebar */}
-      <Sidebar
-        user={user}
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        onLogout={onLogout}
-      />
-
+    <>
       {/* Mobile overlay */}
-      {sidebarOpen && (
+      {isMobile && sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-20 lg:hidden"
+          className="overlay"
+          style={{ zIndex: 45 }}
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Main content area */}
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <Navbar
-          user={user}
-          onMenuClick={() => setSidebarOpen(true)}
-          onLogout={onLogout}
-        />
+      <Sidebar
+        user={user}
+        onLogout={onLogout}
+        isMobile={isMobile}
+        isOpen={sidebarOpen}
+        onLinkClick={closeSidebar}
+      />
 
-        <main className="flex-1 overflow-y-auto">
+      <Navbar
+        user={user}
+        onLogout={onLogout}
+        onMenuToggle={() => setSidebarOpen(v => !v)}
+        isMobile={isMobile}
+      />
+
+      <main className="page-body">
+        <div style={{ padding: '32px 24px', maxWidth: 1000, margin: '0 auto' }}>
           <Outlet />
-        </main>
-      </div>
-    </div>
+        </div>
+      </main>
+    </>
   )
 }

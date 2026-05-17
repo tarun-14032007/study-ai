@@ -1,118 +1,255 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { storage } from '../utils/storage.js'
+import PageContainer from '../components/ui/PageContainer.jsx'
 
-function Message({ role, text, time }) {
-  const isUser = role === 'user'
+// ─── Prompt suggestions shown when history is empty ──────────────────────────
+const SUGGESTIONS = [
+  "Explain Newton's laws of motion in simple terms",
+  "What's the difference between mitosis and meiosis?",
+  "Give me a 5-step study plan for an exam next week",
+  "Explain the Pythagorean theorem with an example",
+  "What caused the First World War?",
+  "How do I solve quadratic equations?",
+]
+
+// ─── Fake AI responses — deterministic to avoid randomness ───────────────────
+function generateReply(userMessage) {
+  const msg = userMessage.toLowerCase()
+
+  if (msg.includes('newton') || msg.includes('laws of motion')) {
+    return "Newton's three laws of motion are:\n\n**1st Law (Inertia):** An object stays at rest or in uniform motion unless acted on by an external force.\n\n**2nd Law:** Force = Mass × Acceleration. The harder you push something, the faster it accelerates.\n\n**3rd Law:** For every action there is an equal and opposite reaction.\n\nThink of it this way — when you push a wall, the wall pushes back on you with the same force. That's the third law in action."
+  }
+
+  if (msg.includes('mitosis') || msg.includes('meiosis')) {
+    return "Great biology question!\n\n**Mitosis** produces 2 identical daughter cells with the same number of chromosomes as the parent. It's used for growth and repair.\n\n**Meiosis** produces 4 genetically unique cells with half the chromosomes. It's used to create sex cells (sperm and eggs).\n\nSimple memory trick: *Mitosis = Multiplying (same)*. *Meiosis = Making gametes (half)*."
+  }
+
+  if (msg.includes('quadratic') || msg.includes('equation')) {
+    return "Quadratic equations have the form **ax² + bx + c = 0**.\n\nTo solve, use the quadratic formula:\n\n  x = (−b ± √(b² − 4ac)) / 2a\n\n**Example:** x² − 5x + 6 = 0\n  a=1, b=−5, c=6\n  x = (5 ± √(25 − 24)) / 2\n  x = (5 ± 1) / 2\n  x = 3 or x = 2\n\nYou can also try factoring first — it's faster when it works!"
+  }
+
+  if (msg.includes('study plan') || msg.includes('exam')) {
+    return "Here's a solid 5-step study plan for an upcoming exam:\n\n**1. Audit your syllabus** — List every topic and mark which ones you're weak on.\n\n**2. Create a schedule** — Divide the days you have left between all topics. Weak topics get more time.\n\n**3. Active recall** — Don't just re-read. Close the book and test yourself. Use the Planner to track this.\n\n**4. Spaced repetition** — Revisit older topics every 2–3 days so you don't forget them.\n\n**5. Mock tests** — Do at least one full past paper under timed conditions before the real exam.\n\nWant me to help you build a schedule for a specific subject?"
+  }
+
+  if (msg.includes('pythagorean') || msg.includes('pythagoras')) {
+    return "The Pythagorean Theorem states:\n\n  **a² + b² = c²**\n\nwhere **c** is the hypotenuse (longest side) of a right-angled triangle.\n\n**Example:** A triangle has legs of 3 and 4. Find the hypotenuse.\n  3² + 4² = c²\n  9 + 16 = 25\n  c = √25 = **5**\n\nThis is the classic 3-4-5 right triangle. It appears everywhere — construction, navigation, physics!"
+  }
+
+  if (msg.includes('world war') || msg.includes('ww1') || msg.includes('first world war')) {
+    return "The First World War (1914–1918) was caused by a combination of factors, often remembered as **MAIN**:\n\n**M — Militarism:** European powers were in an arms race, building up their armies and navies.\n\n**A — Alliances:** Europe was split into two armed camps — the Triple Entente and the Triple Alliance.\n\n**I — Imperialism:** Competition for colonies created tensions between the great powers.\n\n**N — Nationalism:** Especially in the Balkans. The assassination of Archduke Franz Ferdinand in Sarajevo was the spark that ignited the war.\n\nThe war killed over 17 million people and reshaped the world map entirely."
+  }
+
+  // Generic fallback
+  return `That's a good question about "${userMessage}".\n\nIn a production version of Study AI, this response would come from a real AI model connected via API (like GPT-4 or Claude). For now, this is a placeholder to show you how the chat works.\n\nTip: Try asking one of the suggested questions — those have detailed answers built in! You can also connect an AI API key in the settings to get real answers for anything you ask.`
+}
+
+// ─── Typing indicator ────────────────────────────────────────────────────────
+function TypingDots() {
   return (
-    <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
-      <div className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center text-xs font-bold ${
-        isUser ? 'bg-indigo-600 text-white' : 'bg-zinc-700 text-zinc-300'
-      }`}>
-        {isUser ? 'You' : 'AI'}
+    <div style={{ display: 'flex', gap: 5, padding: '12px 14px', alignItems: 'center' }}>
+      {[0, 1, 2].map(i => (
+        <span
+          key={i}
+          style={{
+            width: 7, height: 7,
+            borderRadius: '50%',
+            background: 'var(--text-3)',
+            display: 'inline-block',
+            animation: `bounce 1.2s ease infinite`,
+            animationDelay: `${i * 0.2}s`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes bounce {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-5px); }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+// ─── Single message bubble ───────────────────────────────────────────────────
+function Message({ msg }) {
+  const isUser = msg.role === 'user'
+
+  return (
+    <div style={{
+      display: 'flex',
+      flexDirection: isUser ? 'row-reverse' : 'row',
+      gap: 10,
+      alignItems: 'flex-end',
+      animation: 'slideUp 0.2s ease',
+    }}>
+      {/* Avatar */}
+      <div style={{
+        width: 30, height: 30,
+        borderRadius: '50%',
+        background: isUser ? 'var(--accent)' : 'var(--surface-3)',
+        border: `1.5px solid ${isUser ? 'var(--accent)' : 'var(--border-md)'}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '0.7rem', fontWeight: 700,
+        color: isUser ? '#fff' : 'var(--text-2)',
+        flexShrink: 0,
+      }}>
+        {isUser ? 'U' : 'AI'}
       </div>
-      <div className={`max-w-[75%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
-        <div className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-          isUser
-            ? 'bg-indigo-600 text-white rounded-tr-sm'
-            : 'bg-zinc-800 text-zinc-200 rounded-tl-sm'
-        }`}>
-          {text}
+
+      <div style={{
+        display: 'flex', flexDirection: 'column',
+        alignItems: isUser ? 'flex-end' : 'flex-start',
+        gap: 3, maxWidth: '75%',
+      }}>
+        <div className={isUser ? 'bubble-user' : 'bubble-ai'}>
+          {/* Render message with basic formatting */}
+          {msg.text.split('\n').map((line, i) => (
+            <p key={i} style={{ margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+              {line.replace(/\*\*(.+?)\*\*/g, '__BOLD__$1__BOLD__').split('__BOLD__').map((chunk, j) =>
+                j % 2 === 1 ? <strong key={j}>{chunk}</strong> : chunk
+              )}
+            </p>
+          ))}
         </div>
-        <span className="text-[11px] text-zinc-600 px-1">{time}</span>
+        <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', padding: '0 4px' }}>
+          {new Date(msg.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
       </div>
     </div>
   )
 }
 
-const suggestions = [
-  "Explain Newton's laws of motion simply",
-  "What is the difference between RAM and ROM?",
-  "Help me create a study schedule for 3 exams",
-  "Summarize the causes of World War I",
-]
-
+// ─── Main Chat Page ──────────────────────────────────────────────────────────
 export default function Chat({ user }) {
-  const [messages, setMessages] = useState([])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const bottomRef = useRef(null)
+  const [messages, setMessages] = useState(() => storage.get('messages') || [])
+  const [input,    setInput]    = useState('')
+  const [thinking, setThinking] = useState(false)
+  const bottomRef  = useRef(null)
   const textareaRef = useRef(null)
 
+  // Persist messages
+  useEffect(() => {
+    storage.set('messages', messages)
+  }, [messages])
+
+  // Auto-scroll to bottom
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, loading])
+  }, [messages, thinking])
 
-  const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  function send(text) {
+    const q = (text || input).trim()
+    if (!q || thinking) return
 
-  const sendMessage = (text) => {
-    const query = text || input.trim()
-    if (!query || loading) return
-
+    const userMsg = { id: Date.now(), role: 'user', text: q, ts: new Date().toISOString() }
+    setMessages(prev => [...prev, userMsg])
     setInput('')
-    setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: query, time: now() }])
-    setLoading(true)
+    setThinking(true)
 
-    // Simulate AI response
+    // Simulate AI delay (500ms–1.5s)
+    const delay = 600 + Math.floor(Math.random() * 900)
     setTimeout(() => {
-      const responses = [
-        `Great question! Let me break that down for you.\n\n"${query}" is a topic worth exploring carefully. In a real app, this is where the AI model (like Claude or GPT) would provide a detailed, accurate answer based on your specific question.\n\nFor now, keep studying — you're doing great! 🎓`,
-        `That's an interesting topic. Here's a quick overview:\n\nIn a production version of StudyAI, this response would be generated by an actual AI model connected via API. Your question about "${query}" would get a thorough explanation with examples.\n\nKeep asking questions — curiosity is the foundation of learning!`,
-        `Good thinking! Here's what you should know:\n\nThis is a demo response. The real StudyAI would connect to an AI backend to answer "${query}" with accurate, subject-specific information.\n\nDon't stop here — dig deeper into the topic!`,
-      ]
-      const reply = responses[Math.floor(Math.random() * responses.length)]
-      setMessages(prev => [...prev, { id: Date.now() + 1, role: 'ai', text: reply, time: now() }])
-      setLoading(false)
-    }, 1200 + Math.random() * 800)
+      const aiText = generateReply(q)
+      const aiMsg  = { id: Date.now() + 1, role: 'ai', text: aiText, ts: new Date().toISOString() }
+      setMessages(prev => [...prev, aiMsg])
+      setThinking(false)
+    }, delay)
   }
 
-  const handleKey = (e) => {
+  function onKeyDown(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      sendMessage()
+      send()
     }
   }
 
+  function clearChat() {
+    if (!window.confirm('Clear all chat history?')) return
+    setMessages([])
+    storage.remove('messages')
+  }
+
+  const userMsgCount = messages.filter(m => m.role === 'user').length
+
   return (
-    <div className="flex flex-col h-full max-h-[calc(100vh-56px)]">
+    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - var(--nav-h) - 64px)', minHeight: 400 }}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-zinc-800 bg-zinc-900/50 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
-            <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-          </div>
-          <div>
-            <h1 className="text-white font-semibold text-sm">Study AI Assistant</h1>
-            <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-              <p className="text-xs text-zinc-500">Ready to help you learn</p>
-            </div>
-          </div>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        marginBottom: 16, flexShrink: 0,
+      }}>
+        <div>
+          <h2 style={{ fontWeight: 800, fontSize: '1.4rem', color: 'var(--text)', letterSpacing: '-0.02em' }}>
+            AI Chat
+          </h2>
+          <p style={{ color: 'var(--text-2)', fontSize: '0.875rem', marginTop: 3 }}>
+            {userMsgCount === 0 ? 'Ask anything about your studies' : `${userMsgCount} message${userMsgCount !== 1 ? 's' : ''} sent`}
+          </p>
         </div>
+        {messages.length > 0 && (
+          <button className="btn btn-ghost btn-sm" onClick={clearChat} style={{ color: 'var(--text-3)' }}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+            </svg>
+            Clear chat
+          </button>
+        )}
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-5">
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center gap-6 py-12">
-            <div className="w-16 h-16 rounded-2xl bg-indigo-600/20 border border-indigo-500/20 flex items-center justify-center">
-              <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+      {/* Message list */}
+      <div
+        className="card"
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: 20,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 16,
+          marginBottom: 12,
+        }}
+      >
+        {messages.length === 0 && !thinking ? (
+          /* Empty / suggestions state */
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 20, textAlign: 'center' }}>
+            <div style={{
+              width: 60, height: 60,
+              background: 'var(--accent-soft)',
+              borderRadius: 20,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--accent)',
+            }}>
+              <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
               </svg>
             </div>
             <div>
-              <h2 className="text-white font-semibold text-lg">
-                Hey {user?.name?.split(' ')[0] || 'there'}, what are you studying?
-              </h2>
-              <p className="text-zinc-500 text-sm mt-1">Ask me anything — I'm here to help you understand it.</p>
+              <p style={{ fontWeight: 700, fontSize: '1.0625rem', color: 'var(--text)', marginBottom: 6 }}>
+                Hi {user?.name?.split(' ')[0] || 'there'} 👋 What are you studying?
+              </p>
+              <p style={{ color: 'var(--text-2)', fontSize: '0.875rem' }}>
+                Ask a question or pick a suggestion below.
+              </p>
             </div>
-
-            <div className="grid sm:grid-cols-2 gap-2 w-full max-w-lg">
-              {suggestions.map(s => (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8, width: '100%', maxWidth: 560 }}>
+              {SUGGESTIONS.map(s => (
                 <button
                   key={s}
-                  onClick={() => sendMessage(s)}
-                  className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-white text-sm text-left px-4 py-3 rounded-xl transition-all"
+                  onClick={() => send(s)}
+                  disabled={thinking}
+                  className="card"
+                  style={{
+                    padding: '11px 14px',
+                    cursor: 'pointer', border: '1px solid var(--border)',
+                    background: 'var(--surface-2)',
+                    fontSize: '0.8125rem', color: 'var(--text-2)', textAlign: 'left',
+                    lineHeight: 1.4, borderRadius: 'var(--radius)',
+                    transition: 'all 0.12s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--text)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-2)' }}
                 >
                   {s}
                 </button>
@@ -120,50 +257,70 @@ export default function Chat({ user }) {
             </div>
           </div>
         ) : (
-          messages.map(msg => (
-            <Message key={msg.id} {...msg} />
-          ))
+          <>
+            {messages.map(msg => (
+              <Message key={msg.id} msg={msg} />
+            ))}
+            {thinking && (
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10 }}>
+                <div style={{
+                  width: 30, height: 30, borderRadius: '50%',
+                  background: 'var(--surface-3)', border: '1.5px solid var(--border-md)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-2)', flexShrink: 0,
+                }}>
+                  AI
+                </div>
+                <div className="bubble-ai" style={{ padding: 0 }}>
+                  <TypingDots />
+                </div>
+              </div>
+            )}
+          </>
         )}
-
-        {loading && (
-          <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-lg bg-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-300 shrink-0">AI</div>
-            <div className="bg-zinc-800 rounded-2xl rounded-tl-sm px-4 py-3 flex gap-1.5 items-center">
-              <div className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <div className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <div className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-            </div>
-          </div>
-        )}
-
         <div ref={bottomRef} />
       </div>
 
       {/* Input area */}
-      <div className="px-4 sm:px-6 py-4 border-t border-zinc-800 bg-zinc-900/50 shrink-0">
-        <div className="flex gap-2 items-end bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 focus-within:border-indigo-500 transition-all">
+      <div className="card" style={{ padding: '12px 14px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
           <textarea
             ref={textareaRef}
             rows={1}
             value={input}
             onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKey}
-            placeholder="Ask a question... (Enter to send, Shift+Enter for newline)"
-            className="flex-1 bg-transparent text-sm text-white placeholder-zinc-500 outline-none resize-none leading-relaxed"
-            style={{ maxHeight: '120px' }}
+            onKeyDown={onKeyDown}
+            placeholder="Type a question… (Enter to send · Shift+Enter for new line)"
+            disabled={thinking}
+            className="input"
+            style={{
+              flex: 1,
+              resize: 'none',
+              minHeight: 44,
+              maxHeight: 160,
+              lineHeight: 1.5,
+              border: 'none',
+              background: 'transparent',
+              boxShadow: 'none',
+              padding: '10px 4px',
+              fontSize: '0.9375rem',
+            }}
           />
           <button
-            onClick={() => sendMessage()}
-            disabled={!input.trim() || loading}
-            className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white rounded-xl w-9 h-9 flex items-center justify-center transition-colors shrink-0"
+            onClick={() => send()}
+            disabled={!input.trim() || thinking}
+            className="btn btn-primary btn-icon"
+            aria-label="Send message"
+            style={{ flexShrink: 0, width: 44, height: 44, borderRadius: 11 }}
           >
-            <svg className="w-4 h-4 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            <svg width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
             </svg>
           </button>
         </div>
-        <p className="text-[11px] text-zinc-600 mt-2 text-center">
-          AI responses are simulated — connect an AI API key to enable real answers.
+        <p style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginTop: 6, paddingLeft: 4 }}>
+          Responses are simulated. Connect an AI API to get real answers.
         </p>
       </div>
     </div>

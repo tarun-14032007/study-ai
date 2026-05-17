@@ -1,231 +1,172 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 
-const navItems = [
+const NAV = [
   {
-    label: 'Main',
-    items: [
-      {
-        path: '/dashboard',
-        label: 'Dashboard',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-        ),
-      },
-      {
-        path: '/chat',
-        label: 'AI Chat',
-        badge: 'AI',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-          </svg>
-        ),
-      },
-      {
-        path: '/notes',
-        label: 'My Notes',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        ),
-      },
-      {
-        path: '/planner',
-        label: 'Study Planner',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-        ),
-      },
-    ],
+    to: '/dashboard',
+    label: 'Dashboard',
+    icon: (
+      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      </svg>
+    ),
   },
   {
-    label: 'Tools',
-    items: [
-      {
-        path: '#',
-        label: 'Flashcards',
-        coming: true,
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-          </svg>
-        ),
-      },
-      {
-        path: '#',
-        label: 'Progress Tracker',
-        coming: true,
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-        ),
-      },
-      {
-        path: '#',
-        label: 'Quiz Mode',
-        coming: true,
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-          </svg>
-        ),
-      },
-    ],
+    to: '/chat',
+    label: 'AI Chat',
+    icon: (
+      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+      </svg>
+    ),
   },
   {
-    label: 'Account',
-    items: [
-      {
-        path: '#',
-        label: 'Settings',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        ),
-      },
-      {
-        path: '#',
-        label: 'Help & Support',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        ),
-      },
-    ],
+    to: '/notes',
+    label: 'Notes',
+    icon: (
+      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <polyline strokeLinecap="round" strokeLinejoin="round" points="14 2 14 8 20 8" />
+        <line x1="16" y1="13" x2="8" y2="13" strokeLinecap="round" />
+        <line x1="16" y1="17" x2="8" y2="17" strokeLinecap="round" />
+        <line x1="10" y1="9" x2="8" y2="9" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    to: '/planner',
+    label: 'Planner',
+    icon: (
+      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <line x1="16" y1="2" x2="16" y2="6" strokeLinecap="round" />
+        <line x1="8"  y1="2" x2="8"  y2="6" strokeLinecap="round" />
+        <line x1="3"  y1="10" x2="21" y2="10" />
+        <path strokeLinecap="round" d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
+      </svg>
+    ),
   },
 ]
 
-export default function Sidebar({ user, isOpen, onClose, onLogout }) {
+function Avatar({ name }) {
+  const initials = name
+    ? name.trim().split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+    : '?'
+  return (
+    <div style={{
+      width: 34, height: 34,
+      borderRadius: '50%',
+      background: 'var(--accent-soft)',
+      border: '1.5px solid var(--accent)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontSize: '0.8rem', fontWeight: 700,
+      color: 'var(--accent)',
+      flexShrink: 0,
+    }}>
+      {initials}
+    </div>
+  )
+}
+
+export default function Sidebar({ user, onLogout, isMobile, isOpen, onLinkClick }) {
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    onClose()
+  function handleLogout() {
     onLogout()
     navigate('/')
   }
 
-  const initials = user?.name
-    ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-    : 'U'
+  const sidebarClass = [
+    'sidebar',
+    isMobile && !isOpen ? 'mobile-closed' : '',
+  ].filter(Boolean).join(' ')
 
   return (
-    <aside className={`
-      fixed top-0 left-0 h-full w-64 bg-zinc-900 border-r border-zinc-800
-      z-30 flex flex-col transition-transform duration-300 ease-in-out
-      ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-    `}>
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 h-14 border-b border-zinc-800 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-          <span className="font-bold text-white text-sm">StudyAI</span>
-        </div>
-        <button
-          onClick={onClose}
-          className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+    <aside className={sidebarClass}>
+      {/* Brand */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '0 18px',
+        height: 'var(--nav-h)',
+        borderBottom: '1px solid var(--border)',
+        flexShrink: 0,
+      }}>
+        <div style={{
+          width: 32, height: 32,
+          background: 'var(--accent)',
+          borderRadius: 9,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <svg width="17" height="17" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
           </svg>
-        </button>
+        </div>
+        <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text)', letterSpacing: '-0.02em' }}>
+          Study AI
+        </span>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
-        {navItems.map((group) => (
-          <div key={group.label}>
-            <p className="px-3 text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-1">
-              {group.label}
-            </p>
-            <div className="space-y-0.5">
-              {group.items.map((item) => (
-                item.coming ? (
-                  <div
-                    key={item.label}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-zinc-600 cursor-not-allowed"
-                  >
-                    <span className="text-zinc-700">{item.icon}</span>
-                    <span className="text-sm flex-1">{item.label}</span>
-                    <span className="text-[10px] bg-zinc-800 text-zinc-600 px-1.5 py-0.5 rounded font-medium">Soon</span>
-                  </div>
-                ) : (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    onClick={onClose}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                        isActive
-                          ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/20'
-                          : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
-                      }`
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        <span className={isActive ? 'text-indigo-400' : 'text-zinc-500'}>
-                          {item.icon}
-                        </span>
-                        <span className="flex-1">{item.label}</span>
-                        {item.badge && (
-                          <span className="text-[10px] bg-indigo-600 text-white px-1.5 py-0.5 rounded font-semibold">
-                            {item.badge}
-                          </span>
-                        )}
-                      </>
-                    )}
-                  </NavLink>
-                )
-              ))}
-            </div>
-          </div>
+      <nav style={{ flex: 1, overflowY: 'auto', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <p style={{
+          fontSize: '0.6875rem', fontWeight: 700, color: 'var(--text-3)',
+          textTransform: 'uppercase', letterSpacing: '0.08em',
+          padding: '8px 10px 4px',
+        }}>
+          Menu
+        </p>
+
+        {NAV.map(item => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            onClick={onLinkClick}
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+          >
+            {item.icon}
+            {item.label}
+          </NavLink>
         ))}
       </nav>
 
-      {/* User footer + Logout */}
-      <div className="border-t border-zinc-800 p-3 shrink-0">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-lg mb-1">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
-            {initials}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">{user?.name}</p>
-            <p className="text-xs text-zinc-500 truncate">{user?.email}</p>
+      {/* User + Logout */}
+      <div style={{
+        padding: '12px 10px',
+        borderTop: '1px solid var(--border)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 6,
+        flexShrink: 0,
+      }}>
+        {/* User info row */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '8px 10px',
+          borderRadius: 'var(--radius-sm)',
+          background: 'var(--surface-2)',
+        }}>
+          <Avatar name={user?.name} />
+          <div style={{ minWidth: 0 }}>
+            <p style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.2 }}>
+              {user?.name || 'User'}
+            </p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', lineHeight: 1.2, marginTop: 2 }}>
+              Student
+            </p>
           </div>
         </div>
 
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        {/* Logout */}
+        <button className="btn btn-ghost" onClick={handleLogout} style={{ width: '100%', justifyContent: 'flex-start', color: 'var(--red)', padding: '9px 10px' }}>
+          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
-          Sign Out
+          Sign out
         </button>
       </div>
     </aside>

@@ -1,15 +1,21 @@
-export default function PageContainer({ children, title, subtitle, action, className = '' }) {
+export default function PageContainer({ title, subtitle, action, children }) {
   return (
-    <div className={`max-w-5xl mx-auto px-4 sm:px-6 py-8 ${className}`}>
+    <div className="fade-in">
       {(title || action) && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
           {title && (
             <div>
-              <h1 className="text-2xl font-bold text-white">{title}</h1>
-              {subtitle && <p className="text-zinc-500 text-sm mt-0.5">{subtitle}</p>}
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                {title}
+              </h2>
+              {subtitle && (
+                <p style={{ color: 'var(--text-2)', fontSize: '0.9rem', marginTop: 5 }}>
+                  {subtitle}
+                </p>
+              )}
             </div>
           )}
-          {action && <div>{action}</div>}
+          {action && <div style={{ flexShrink: 0 }}>{action}</div>}
         </div>
       )}
       {children}

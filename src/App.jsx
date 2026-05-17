@@ -1,28 +1,40 @@
-import { useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useState } from 'react'
+import { storage } from './utils/storage.js'
 
-import Login from './pages/Login.jsx'
-import Dashboard from './pages/Dashboard.jsx'
-import Planner from './pages/Planner.jsx'
-import Notes from './pages/Notes.jsx'
-import Chat from './pages/Chat.jsx'
 import DashboardLayout from './layouts/DashboardLayout.jsx'
+import Login     from './pages/login.jsx'
+import Dashboard from './pages/dashboard.jsx'
+import Planner   from './pages/planner.jsx'
+import Notes     from './pages/notes.jsx'
+import Chat      from './pages/chat.jsx'
 
-function App() {
-  const [user, setUser] = useState(null)
+export default function App() {
+  const [user, setUser] = useState(() => storage.get('user'))
 
-  const handleLogout = () => setUser(null)
+  function login(userData) {
+    storage.set('user', userData)
+    setUser(userData)
+  }
+
+  function logout() {
+    storage.remove('user')
+    setUser(null)
+  }
 
   return (
     <Routes>
-      <Route path="/" element={
-        user ? <Navigate to="/dashboard" replace /> : <Login setUser={setUser} />
-      } />
+      {/* Public */}
+      <Route
+        path="/"
+        element={user ? <Navigate to="/dashboard" replace /> : <Login onLogin={login} />}
+      />
 
+      {/* Protected — wrapped in DashboardLayout */}
       <Route
         element={
           user
-            ? <DashboardLayout user={user} onLogout={handleLogout} />
+            ? <DashboardLayout user={user} onLogout={logout} />
             : <Navigate to="/" replace />
         }
       >
@@ -32,9 +44,8 @@ function App() {
         <Route path="/chat"      element={<Chat user={user} />} />
       </Route>
 
+      {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
-
-export default App
