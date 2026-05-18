@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useTheme } from '../../utils/theme.js'
+import { useTheme } from '../../utils/theme.jsx'
 
 const ROUTE_LABELS = {
   '/dashboard': 'Dashboard',

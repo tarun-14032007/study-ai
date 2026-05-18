@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useTheme } from '../utils/theme.js'
+import { useTheme } from '../utils/theme.jsx'
 
 export default function Login({ onLogin }) {
   const { theme, toggleTheme } = useTheme()
